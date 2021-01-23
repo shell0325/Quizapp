@@ -10,23 +10,51 @@ class Quiz {
   constructor(quizData) {
     this._quizzes = quizData.results;
     this._corrextAnswerNum = 0;
-    console.log(this._quizzes[0].correct_answer);
   }
+  /**
+   *クイズのカテゴリーを取得
+   * @memberof Quiz
+   */
   getQuizCategory(index) {
     return this._quizzes[index - 1].category;
   }
+
+  /**
+   *クイズの難易度を取得
+   * @memberof Quiz
+   */
   getQuizDifficulty(index) {
     return this._quizzes[index - 1].difficulty;
   }
+  /**
+   *クイズの問題を取得
+   * @memberof Quiz
+   */
   getQuizQuestion(index) {
     return this._quizzes[index - 1].question;
   }
+  /**
+   *クイズの数を取得
+   * @memberof Quiz
+   */
   getNumQuiz() {
     return this._quizzes.length;
   }
+  /**
+   *クイズの答えを取得
+   * @memberof Quiz
+   */
   getQuizAnswer(index) {
     return this._quizzes[index - 1].correct_answer;
   }
+  /**
+   *クイズの間違っている回答を取得
+   * @memberof Quiz
+   */
+  /**
+   *正答数を数える
+   * @memberof Quiz
+   */
   getIncorrectAnswer(index) {
     return this._quizzes[index - 1].incorrect_answers;
   }
@@ -36,6 +64,10 @@ class Quiz {
       return this._corrextAnswerNum++;
     }
   }
+  /**
+   *正答数を取得
+   * @memberof Quiz
+   */
   GetCorrectAnswerNum() {
     return this._corrextAnswerNum;
   }
@@ -46,6 +78,10 @@ startButton.addEventListener("click", () => {
   fetchQuizData(1);
 });
 
+/**
+ *クイズのデータをURLから取得する処理
+ * @param {*} index
+ */
 const fetchQuizData = async (index) => {
   titleElement.textContent = "取得中";
   questionElement.textContent = "少々お待ち下さい";
@@ -53,10 +89,14 @@ const fetchQuizData = async (index) => {
   const response = await fetch(API_URL);
   const quizData = await response.json();
   const quizInstance = new Quiz(quizData);
-  console.log(quizInstance);
   makeQuiz(quizInstance, index);
 };
 
+/**
+ *クイズを作成する処理
+ * @param {*Quizの結果が入っている変数} quizInstance
+ * @param {*} index
+ */
 const makeQuiz = (quizInstance, index) => {
   titleElement.textContent = `問題${index}`;
   questionElement.textContent = `【クイズ】${quizInstance.getQuizQuestion(
@@ -69,54 +109,78 @@ const makeQuiz = (quizInstance, index) => {
     index
   )}`;
 
-  const answers = [
-    quizInstance.getQuizAnswer(index),
-    ...quizInstance.getIncorrectAnswer(index),
-  ];
-  // ShuffleQuiz(answers);
+  const answers =  quizAnswer(quizInstance, index);
 
   answers.forEach((answer) => {
-    console.log(answer)
     const buttonList = document.createElement("li");
     quizList.appendChild(buttonList);
     const buttonElement = document.createElement("button");
     buttonElement.innerHTML = answer;
     buttonList.appendChild(buttonElement);
+
+    
     buttonElement.addEventListener("click", () => {
       quizInstance.getCorrectAnswer(index, answer);
       index++;
-      quizList.textContent = '';
-      setNextQuiz(quizInstance, index)
+      quizList.textContent = "";
+      setNextQuiz(quizInstance, index);
     });
   });
 };
 
+/**
+ *クイズを終了させる処理
+ * @param {*} quizInstance
+ */
 const finishQuiz = (quizInstance) => {
   titleElement.textContent = `あなたの正答数は${quizInstance.GetCorrectAnswerNum()}です!!`;
-  questionElement.textContent = '再度チャレンジしたい場合は以下をクリック!!';
-  quizCategory.textContent = '';
-  quizDifficult.textContent = '';
-  const homeButton = document.createElement('button');
-  homeButton.textContent = 'ホームに戻る';
-  homeButton.addEventListener('click', () => {
+  questionElement.textContent = "再度チャレンジしたい場合は以下をクリック!!";
+  quizCategory.textContent = "";
+  quizDifficult.textContent = "";
+  const homeButton = document.createElement("button");
+  homeButton.textContent = "ホームに戻る";
+  homeButton.addEventListener("click", () => {
     location.reload();
-  })
+  });
 
   quizList.appendChild(homeButton);
-}
+};
 
-const setNextQuiz = (quizInstance,index) => {
+/**
+ *クイズを終了するか継続するかを判断する処理
+ * @param {*} quizInstance
+ * @param {*} index
+ */
+const setNextQuiz = (quizInstance, index) => {
   if (index <= quizInstance.getNumQuiz()) {
     makeQuiz(quizInstance, index);
   } else {
     finishQuiz(quizInstance);
   }
-}
+};
 
-const ShuffleQuiz = ([...array]) => {
-  for (const i = array.length - 1; i >= 0; i--) {
+/**
+ *クイズの回答の選択肢をランダムで表示させる処理
+ * @param {*} [...array]
+ * @return {*} 
+ */
+const shuffleQuiz = ([...array]) => {
+  for (let i = array.length - 1; i >= 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+};
+
+/**
+ *クイズの回答を一つの配列にまとめる処理
+ * @param {*} quizInstance
+ * @param {*} index
+ */
+const quizAnswer = (quizInstance, index) => {
+  const answers = [
+    quizInstance.getQuizAnswer(index),
+    ...quizInstance.getIncorrectAnswer(index),
+  ];
+  return shuffleQuiz(answers);
 };
