@@ -90,6 +90,7 @@ const fetchQuizData = async (index) => {
   const quizData = await response.json();
   const quizInstance = new Quiz(quizData);
   makeQuiz(quizInstance, index);
+  console.log(quizInstance);
 };
 
 /**
@@ -99,7 +100,7 @@ const fetchQuizData = async (index) => {
  */
 const makeQuiz = (quizInstance, index) => {
   titleElement.textContent = `問題${index}`;
-  questionElement.textContent = `【クイズ】${quizInstance.getQuizQuestion(
+  questionElement.innerHTML = `【クイズ】${quizInstance.getQuizQuestion(
     index
   )}`;
   quizCategory.textContent = `【ジャンル】${quizInstance.getQuizCategory(
@@ -109,7 +110,7 @@ const makeQuiz = (quizInstance, index) => {
     index
   )}`;
 
-  const answers =  quizAnswer(quizInstance, index);
+  const answers = quizAnswer(quizInstance, index);
 
   answers.forEach((answer) => {
     const buttonList = document.createElement("li");
@@ -118,7 +119,6 @@ const makeQuiz = (quizInstance, index) => {
     buttonElement.innerHTML = answer;
     buttonList.appendChild(buttonElement);
 
-    
     buttonElement.addEventListener("click", () => {
       quizInstance.getCorrectAnswer(index, answer);
       index++;
@@ -162,7 +162,7 @@ const setNextQuiz = (quizInstance, index) => {
 /**
  *クイズの回答の選択肢をランダムで表示させる処理
  * @param {*} [...array]
- * @return {*} 
+ * @return {*}
  */
 const shuffleQuiz = ([...array]) => {
   for (let i = array.length - 1; i >= 0; i--) {
